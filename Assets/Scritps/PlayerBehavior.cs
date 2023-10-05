@@ -2,35 +2,97 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum changeColor
+{
+    Red, Green, Blue
+}
+
 public class PlayerBehavior : MonoBehaviour
 {
     public float moveSpeed, range, x, y, z, rotationSpeed;
     public Quaternion rotation, eularAngles, currentRotation;
     public Vector3 currentEularAngles;
-    public Transform target;
+    public GameObject[] target;
+    public changeColor cg;
+    public GameObject redPlayer, greenPlayer, bluePlayer;
 
     public void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);
     }
+
+    private void OnMouseDown()
+    {
+        Debug.Log("MouseDown");
+        if (cg == changeColor.Red)
+        {
+            cg = changeColor.Green;
+        }
+        else if (cg == changeColor.Green)
+        {
+            cg = changeColor.Blue;
+        }
+        else if (cg == changeColor.Blue)
+        {
+            cg = changeColor.Red;
+        }
+        else
+        {
+            cg = changeColor.Red;
+
+        }
+
+    }
+
     void Update()
     {
         EnemyDetector();
+        switch (cg)
+        {
+            case changeColor.Red:
+                redPlayer.SetActive(true);
+                bluePlayer.SetActive(false);
+                greenPlayer.SetActive(false);
+                break;
+            case changeColor.Green:
+                greenPlayer.SetActive(true);
+                redPlayer.SetActive(false);
+                bluePlayer.SetActive(false);
+                break;
+            case changeColor.Blue:
+                bluePlayer.SetActive(true);
+                greenPlayer.SetActive(false);
+                redPlayer.SetActive(false);
+                break;
+            default:
+                break;
+        }
+    
     }
     public void EnemyDetector()
     {
-        float dist = Vector3.Distance(transform.position, target.position);
-        if (dist <=range)
+        target = GameObject.FindGameObjectsWithTag("Enemy");
+        float shortestdistance = Mathf.Infinity;
+        Transform nearestEnemy = null;
+        foreach (GameObject enemy in target)
         {
-            Debug.Log("EnemyDetected");
-            LookRotation();
+            float dist = Vector3.Distance(transform.position, target[0].transform.position);
+
+            if (dist <= shortestdistance)
+            {
+                shortestdistance = dist;
+                nearestEnemy = enemy.transform;
+                Debug.Log("EnemyDetected");
+                LookRotation();
+            }
         }
     }
 
+
     void LookRotation()
     {
-        Vector3 relativePos = transform.position - target.position;
+        Vector3 relativePos = transform.position - target[0].transform.position;
         Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
         transform.rotation = rotation;
     }
