@@ -15,6 +15,8 @@ public class PlayerBehavior : MonoBehaviour
     public GameObject[] target;
     public changeColor cg;
     public GameObject redPlayer, greenPlayer, bluePlayer;
+    public GameObject cube;
+    public GameOverManager gameOverManager;
 
     public void OnDrawGizmosSelected()
     {
@@ -73,20 +75,16 @@ public class PlayerBehavior : MonoBehaviour
     public void EnemyDetector()
     {
         target = GameObject.FindGameObjectsWithTag("Enemy");
-        float shortestdistance = Mathf.Infinity;
-        Transform nearestEnemy = null;
-        foreach (GameObject enemy in target)
-        {
-            float dist = Vector3.Distance(transform.position, target[0].transform.position);
+        cube = target[0];
+        
+        float dist = Vector3.Distance(cube.transform.position, transform.position);
 
-            if (dist <= shortestdistance)
-            {
-                shortestdistance = dist;
-                nearestEnemy = enemy.transform;
-                Debug.Log("EnemyDetected");
-                LookRotation();
-            }
+        if (dist <= range)
+        {
+            Debug.Log("EnemyDetected");
+            LookRotation();
         }
+        
     }
 
 
@@ -95,5 +93,12 @@ public class PlayerBehavior : MonoBehaviour
         Vector3 relativePos = transform.position - target[0].transform.position;
         Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
         transform.rotation = rotation;
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            gameOverManager.gameOver.SetActive(true);
+        }
     }
 }
